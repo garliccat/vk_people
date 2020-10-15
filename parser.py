@@ -96,7 +96,12 @@ for uid in range(last_uid + 1, stop):
     print('Movies: ', movies)
     print()
 
-    # write_csv([uid, 
-    #     name, 
-    #     frnds_cnt, 
-    #     '|'.join(frnds_lst)])
+    write_csv([uid,
+        name,
+        last_name,
+        sex,
+        country,
+        city,
+        bdate,
+        music,
+        movies])
