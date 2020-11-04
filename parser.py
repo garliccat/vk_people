@@ -85,7 +85,7 @@ for uid in range(last_uid + 1, stop):
     l += 1
 
     print('Line number: ', l)
-    print('UID: ', uid, ' of ', stop, ' ({:.1f} %)'.format((uid - last_uid) / (stop - last_uid) * 100))
+    print('UID: ', uid, ' of ', stop, ' ({:.2f} %)'.format(uid / stop * 100))
     print('Name: ', name)
     print('Last Name: ', last_name)
     print('Sex: ', sex)
