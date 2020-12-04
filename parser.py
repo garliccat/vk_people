@@ -1,7 +1,26 @@
+'''
+collects user data from vk
+
+sex: 1 — женский;
+2 — мужской;
+0 — пол не указан.
+
+relation: 1 — не женат/не замужем;
+2 — есть друг/есть подруга;
+3 — помолвлен/помолвлена;
+4 — женат/замужем;
+5 — всё сложно;
+6 — в активном поиске;
+7 — влюблён/влюблена;
+8 — в гражданском браке;
+0 — не указано
+'''
 import requests
 import csv
 from options import token
 import os.path
+import time
+import json
 
 
 def write_csv(data):
@@ -12,7 +31,7 @@ def write_csv(data):
         writer.writerow(data)
 
 def uid_info(uid):
-    ret = requests.get(r'https://api.vk.com/method/users.get?user_id={}&access_token={}&fields=country,city,sex,bdate,music,movies&v=5.124'.format(uid, token)).json()
+    ret = requests.get(r'https://api.vk.com/method/users.get?user_ids={}&access_token={}&fields=country,city,sex,bdate,music,movies,relation&v=5.124'.format(uid, token)).json()
     return ret
 
 if os.path.exists('vk_people.csv'):
@@ -28,80 +47,104 @@ else:
     l = 1
     last_uid = 0
 
-stop = 619000000
+stop = 10000000
+uids_batch = 200
 
-for uid in range(last_uid + 1, stop):
-    
+rest = stop - last_uid
+steps = rest // uids_batch
+tail = rest % uids_batch
+
+uids = [list(range(last_uid, last_uid + uids_batch))]
+
+for i in range(steps):
+    uids.append(list(range(uids[-1][-1], uids[-1][-1] + uids_batch)))
+
+uids.append(list(range(uids[-1][-1], uids[-1][-1] + tail)))
+
+for uid in uids:
+    uid = str(uid).strip('[]').replace(' ', '')
     rawdata = uid_info(uid)
 
-    try:
-        if rawdata['response'][0]['deactivated']:
-            continue
-    except:
-        pass
+    for user_raw in rawdata['response']:
+        try:
+            if user_raw['deactivated']:
+                continue
+        except:
+            pass
 
-    try:
-        name = str(rawdata['response'][0]['first_name'])
-        if name == 'DELETED':
-            continue
-    except:
-        name = ''
+        try:
+            name = str(user_raw['first_name'])
+            if name == 'DELETED':
+                continue
+        except:
+            name = ''
+            
+        try:
+            last_name = str(user_raw['last_name'])
+        except:
+            last_name = ''
+
+        try:
+            sex = user_raw['sex']
+        except:
+            sex = ''
         
-    try:
-        last_name = str(rawdata['response'][0]['last_name'])
-    except:
-        last_name = ''
+        try:
+            country = user_raw['country']['title']
+        except:
+            country = ''
+        
+        try:
+            city = user_raw['city']['title']
+        except:
+            city = ''
 
-    try:
-        sex = rawdata['response'][0]['sex']
-    except:
-        sex = ''
-    
-    try:
-        country = rawdata['response'][0]['country']['title']
-    except:
-        country = ''
-    
-    try:
-        city = rawdata['response'][0]['city']['title']
-    except:
-        city = ''
+        try:
+            bdate = user_raw['bdate']
+        except:
+            bdate = ''
+        
+        try:
+            music = user_raw['music']
+        except:
+            music = ''
+        
+        try:
+            movies = user_raw['movies']
+        except:
+            movies = ''
+        try:
+            relation = user_raw['relation']
+        except:
+            relation = ''
 
-    try:
-        bdate = rawdata['response'][0]['bdate']
-    except:
-        bdate = ''
-    
-    try:
-        music = rawdata['response'][0]['music']
-    except:
-        music = ''
-    
-    try:
-        movies = rawdata['response'][0]['movies']
-    except:
-        movies = ''
-    
-    l += 1
+        try:
+            user_id = int(user_raw['id'])
+        except:
+            user_id = ''
+        
+        l += 1
 
-    print('Line number: ', l)
-    print('UID: ', uid, ' of ', stop, ' ({:.1f} %)'.format((uid - last_uid) / (stop - last_uid) * 100))
-    print('Name: ', name)
-    print('Last Name: ', last_name)
-    print('Sex: ', sex)
-    print('Country: ', country)
-    print('City: ', city)
-    print('Birth date: ', bdate)
-    print('Music: ', music)
-    print('Movies: ', movies)
-    print()
+        print('Line number: ', l)
+        print('UID: {} of {} - ({:.2f} %)'.format(user_id, stop, user_id / stop * 100))
+        print('Name: ', name)
+        print('Last Name: ', last_name)
+        print('Sex: ', sex)
+        print('Country: ', country)
+        print('City: ', city)
+        print('Birth date: ', bdate)
+        print('Music: ', music)
+        print('Movies: ', movies)
+        print('Relation: ', relation)
+        print()
 
-    write_csv([uid,
-        name,
-        last_name,
-        sex,
-        country,
-        city,
-        bdate,
-        music,
-        movies])
+        write_csv([user_id,
+            name,
+            last_name,
+            sex,
+            country,
+            city,
+            bdate,
+            music,
+            movies,
+            relation])
