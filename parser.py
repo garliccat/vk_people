@@ -89,6 +89,7 @@ for uid in uids:
         except:
             sex = ''
         
+<<<<<<< HEAD
         try:
             country = user_raw['country']['title']
         except:
@@ -148,3 +149,63 @@ for uid in uids:
             music,
             movies,
             relation])
+=======
+    try:
+        last_name = str(rawdata['response'][0]['last_name'])
+    except:
+        last_name = ''
+
+    try:
+        sex = rawdata['response'][0]['sex']
+    except:
+        sex = ''
+    
+    try:
+        country = rawdata['response'][0]['country']['title']
+    except:
+        country = ''
+    
+    try:
+        city = rawdata['response'][0]['city']['title']
+    except:
+        city = ''
+
+    try:
+        bdate = rawdata['response'][0]['bdate']
+    except:
+        bdate = ''
+    
+    try:
+        music = rawdata['response'][0]['music']
+    except:
+        music = ''
+    
+    try:
+        movies = rawdata['response'][0]['movies']
+    except:
+        movies = ''
+    
+    l += 1
+
+    print('Line number: ', l)
+    print('UID: ', uid, ' of ', stop, ' ({:.2f} %)'.format(uid / stop * 100))
+    print('Name: ', name)
+    print('Last Name: ', last_name)
+    print('Sex: ', sex)
+    print('Country: ', country)
+    print('City: ', city)
+    print('Birth date: ', bdate)
+    print('Music: ', music)
+    print('Movies: ', movies)
+    print()
+
+    write_csv([uid,
+        name,
+        last_name,
+        sex,
+        country,
+        city,
+        bdate,
+        music,
+        movies])
+>>>>>>> 5681914cf8e6f2efd40c5430ce4fbbb6c46a3379
